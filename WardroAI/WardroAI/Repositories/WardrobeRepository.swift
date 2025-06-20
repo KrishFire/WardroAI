@@ -82,16 +82,41 @@ class WardrobeRepository: ObservableObject {
         // Use user-specific path for RLS security: userId/filename
         let path = "\(userId.uuidString)/\(UUID().uuidString)-\(fileName)"
         
-        try await supabase.storage
-            .from("wardrobe-images")
-            .upload(path, data: imageData, options: FileOptions(contentType: "image/jpeg"))
+        print("[WardrobeRepository] Starting image upload...")
+        print("[WardrobeRepository] Path: \(path)")
+        print("[WardrobeRepository] Image data size: \(imageData.count) bytes")
+        print("[WardrobeRepository] User ID: \(userId.uuidString)")
+        print("[WardrobeRepository] File name: \(fileName)")
         
-        // Since bucket is now private, generate a signed URL for access
-        let signedURL = try await supabase.storage
-            .from("wardrobe-images")
-            .createSignedURL(path: path, expiresIn: 31536000) // 1 year expiry
-        
-        return signedURL.absoluteString
+        do {
+            try await supabase.storage
+                .from("wardrobe-images")
+                .upload(path, data: imageData, options: FileOptions(contentType: "image/jpeg"))
+            
+            print("[WardrobeRepository] Image upload successful, generating signed URL...")
+            
+            // Since bucket is now private, generate a signed URL for access
+            let signedURL = try await supabase.storage
+                .from("wardrobe-images")
+                .createSignedURL(path: path, expiresIn: 31536000) // 1 year expiry
+            
+            print("[WardrobeRepository] Signed URL generated: \(signedURL.absoluteString)")
+            return signedURL.absoluteString
+            
+        } catch {
+            print("[WardrobeRepository] Upload failed with error: \(error)")
+            print("[WardrobeRepository] Error type: \(type(of: error))")
+            print("[WardrobeRepository] Error description: \(error.localizedDescription)")
+            
+            // Re-throw with more specific error handling
+            if error.localizedDescription.contains("SSL") || 
+               error.localizedDescription.contains("network") ||
+               error.localizedDescription.contains("connection") {
+                throw WardrobeError.networkError
+            } else {
+                throw WardrobeError.uploadFailed
+            }
+        }
     }
 }
 

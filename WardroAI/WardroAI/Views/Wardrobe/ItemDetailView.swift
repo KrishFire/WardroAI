@@ -13,96 +13,125 @@ struct ItemDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            LazyVStack(alignment: .leading, spacing: 24) {
                 // Large image
                 AsyncImageView(
                     url: item.photoUrl,
-                    height: 300,
-                    cornerRadius: 16
+                    height: 350,
+                    cornerRadius: 20
                 )
+                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                .padding(.horizontal, 20)
                 
                 // Item details
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 20) {
                     // Title
                     Text(item.displayName)
                         .font(.largeTitle)
                         .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.leading)
                     
                     // Metadata grid
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
-                    ], spacing: 16) {
+                    ], spacing: 20) {
                         DetailRow(title: "Category", value: item.category.capitalized)
                         DetailRow(title: "Brand", value: item.brand ?? "Not specified")
                         DetailRow(title: "Color", value: item.colorDisplay)
                         DetailRow(title: "Material", value: item.material?.capitalized ?? "Not specified")
                     }
+                    .padding(.horizontal, 4)
                     
                     // Price if available
                     if let price = item.price {
                         DetailRow(title: "Price", value: String(format: "$%.2f", price))
+                            .padding(.horizontal, 4)
                     }
                     
                     // Notes section
                     if let notes = item.notes, !notes.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("Notes")
-                                .font(.headline)
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.primary)
                             
                             Text(notes)
                                 .font(.body)
-                                .foregroundColor(.secondary)
-                                .padding()
-                                .background(Color.gray.opacity(0.1))
-                                .cornerRadius(8)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(nil)
+                                .padding(16)
+                                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(.separator, lineWidth: 0.5)
+                                )
                         }
+                        .padding(.horizontal, 4)
                     }
                     
                     // Additional metadata
                     if let occasions = item.occasions, !occasions.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("Occasions")
-                                .font(.headline)
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.primary)
                             
                             FlowLayout {
                                 ForEach(occasions, id: \.self) { occasion in
                                     Text(occasion.capitalized)
                                         .font(.caption)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(Color.purple.opacity(0.2))
-                                        .foregroundColor(.purple)
-                                        .cornerRadius(6)
+                                        .fontWeight(.medium)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.purple.opacity(0.15), in: RoundedRectangle(cornerRadius: 8))
+                                        .foregroundStyle(.purple)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.purple.opacity(0.3), lineWidth: 0.5)
+                                        )
                                 }
                             }
                         }
+                        .padding(.horizontal, 4)
                     }
                     
                     if let seasonality = item.seasonality, !seasonality.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("Seasonality")
-                                .font(.headline)
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.primary)
                             
                             FlowLayout {
                                 ForEach(seasonality, id: \.self) { season in
                                     Text(season.capitalized)
                                         .font(.caption)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(Color.green.opacity(0.2))
-                                        .foregroundColor(.green)
-                                        .cornerRadius(6)
+                                        .fontWeight(.medium)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.green.opacity(0.15), in: RoundedRectangle(cornerRadius: 8))
+                                        .foregroundStyle(.green)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.green.opacity(0.3), lineWidth: 0.5)
+                                        )
                                 }
                             }
                         }
+                        .padding(.horizontal, 4)
                     }
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 20)
             }
         }
-        .navigationTitle("Item Details")
+        .navigationTitle("Details")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.regularMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
@@ -135,9 +164,24 @@ struct ItemDetailView: View {
         }
         .overlay {
             if isLoading {
-                ProgressView("Deleting item...")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.black.opacity(0.3))
+                ZStack {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                    
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .scaleEffect(1.2)
+                            .tint(.white)
+                        
+                        Text("Deleting item...")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                    }
+                    .padding(24)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+                    .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
+                }
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
             }
         }
     }
@@ -172,17 +216,27 @@ struct DetailRow: View {
     let value: String
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
                 .textCase(.uppercase)
+                .tracking(0.5)
             
             Text(value)
                 .font(.body)
-                .fontWeight(.medium)
+                .fontWeight(.semibold)
+                .foregroundStyle(.primary)
+                .lineLimit(2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(.separator, lineWidth: 0.5)
+        )
     }
 }
 

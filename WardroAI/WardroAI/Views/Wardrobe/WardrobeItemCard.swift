@@ -10,11 +10,12 @@ struct WardrobeItemCard: View {
             AsyncImageView(
                 url: item.photoUrl,
                 width: nil,
-                height: 140,
-                cornerRadius: 8
+                height: nil,
+                cornerRadius: 12
             )
             .aspectRatio(1, contentMode: .fill)
             .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 // Quick action buttons overlay
                 VStack {
@@ -24,62 +25,78 @@ struct WardrobeItemCard: View {
                             Button("Delete", role: .destructive, action: onDelete)
                         } label: {
                             Image(systemName: "ellipsis.circle.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundStyle(.white)
                                 .background(
                                     Circle()
-                                        .fill(.black.opacity(0.5))
-                                        .frame(width: 24, height: 24)
+                                        .fill(.black.opacity(0.6))
+                                        .frame(width: 26, height: 26)
                                 )
+                                .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
                         }
+                        .opacity(0.9)
                     }
                     Spacer()
                 }
-                .padding(8)
+                .padding(10)
             )
             
             // Item details with proper spacing
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(item.displayName)
                     .font(.subheadline)
-                    .fontWeight(.medium)
+                    .fontWeight(.semibold)
                     .lineLimit(1)
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
                 
-                HStack(spacing: 6) {
+                HStack(spacing: 8) {
                     Text(item.category.capitalized)
-                        .font(.caption2)
+                        .font(.caption)
                         .fontWeight(.medium)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.blue.opacity(0.15))
-                        .foregroundColor(.blue)
-                        .cornerRadius(4)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.blue.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
+                        .foregroundStyle(.blue)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.blue.opacity(0.3), lineWidth: 0.5)
+                        )
                     
                     Spacer()
                     
                     Text(item.colorDisplay)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
                 }
                 
                 if let brand = item.brand {
                     Text(brand)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
         }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(.systemGray5), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(.separator, lineWidth: 0.5)
         )
+        .frame(maxWidth: .infinity)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: item.id)
+    }
+}
+
+struct CardPressedStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .animation(.spring(response: 0.2, dampingFraction: 0.8), value: configuration.isPressed)
     }
 }
 

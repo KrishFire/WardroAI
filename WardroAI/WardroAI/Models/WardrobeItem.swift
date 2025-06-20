@@ -43,7 +43,7 @@ struct WardrobeItem: Identifiable, Codable {
     }
     
     // Convenience initializer for new items
-    init(name: String, userId: UUID, photoUrl: String? = nil, category: String, brand: String? = nil, primaryColor: String? = nil, notes: String? = nil) {
+    init(name: String, userId: UUID, photoUrl: String? = nil, category: String, brand: String? = nil, primaryColor: String? = nil, notes: String? = nil, aiIdentifiedTagsRaw: String? = nil) {
         self.id = nil
         self.name = name
         self.userId = userId
@@ -58,7 +58,7 @@ struct WardrobeItem: Identifiable, Codable {
         self.occasions = nil
         self.price = nil
         self.notes = notes
-        self.aiIdentifiedTagsRaw = nil
+        self.aiIdentifiedTagsRaw = aiIdentifiedTagsRaw
         self.isArchived = false
         self.createdAt = nil
         self.updatedAt = nil
